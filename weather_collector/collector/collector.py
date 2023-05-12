@@ -71,13 +71,6 @@ def collect_weather_data():
 
         data = requests.get(url).json()
 
-        # city = data["name"]
-        # temperature = data["main"]["temp"]
-        # humidity = data["main"]["humidity"]
-        # wind_speed = data["wind"]["speed"]
-        # dt = data["dt"]
-        # timezone = data["timezone"]
-
         weather = WeatherData(
             city=data["name"],
             temperature=data["main"]["temp"],

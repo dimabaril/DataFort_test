@@ -1,6 +1,15 @@
 version: "3.9"
 services:
-    
+
+  db:
+    image: postgres:15.3-alpine
+    volumes:
+      - weather_db:/var/lib/postgresql/data
+    # ports:
+    #   - "5432:5432"
+    env_file:
+      - ./.env
+
   redis:
     image: redis:7.0-alpine
 
@@ -9,7 +18,14 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
+      - db
       - redis
     ports:
       - "8000:8000"
-    command: bash -c "python3 manage.py runserver 0:8000 & celery -A weather_collector worker -l info &  celery -A weather_collector beat -l info"
+    env_file:
+      - ./.env
+    command: >
+      sh -c "wait-for-it --service db:5432 --timeout 0 && python manage.py migrate && python manage.py shell -c \"from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='$SUPERUSER_USERNAME').exists() or User.objects.create_superuser('$SUPERUSER_USERNAME', '$SUPERUSER_EMAIL', '$SUPERUSER_PASSWORD')\" && python manage.py runserver 0:8000 & celery -A weather_collector worker -l info & celery -A weather_collector beat -l info"
+
+volumes:
+  weather_db:

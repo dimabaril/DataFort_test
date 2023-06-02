@@ -6,6 +6,4 @@ class CollectorConfig(AppConfig):
     name = "collector"
 
     def ready(self):
-        # Import celery app now that Django is mostly ready.
-        # This initializes Celery and autodiscovers tasks
         import weather_collector.celery

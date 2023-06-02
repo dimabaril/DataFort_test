@@ -21,7 +21,8 @@ SECRET_KEY = os.getenv(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = [os.getenv("DJANGO_ALLOWED_HOSTS", default="*").split(",")]
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -81,10 +82,12 @@ DATABASES = {
         "ENGINE": os.getenv(
             "DB_ENGINE",
             default="django.db.backends.postgresql",
+            # default="django.db.backends.sqlite3",  # SQLite3
         ),
         "NAME": os.getenv(
             "DB_NAME",
             default="postgres",
+            # default=BASE_DIR / "db.sqlite3",  # SQLite3
         ),
         "USER": os.getenv(
             "POSTGRES_USER",
@@ -104,7 +107,7 @@ DATABASES = {
             "DB_PORT",
             default="5432",
         ),
-    }
+    },
 }
 
 # Password validation
@@ -158,13 +161,22 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CELERY_BROKER_URL = "redis://redis:6379/0"
 CELERY_RESULT_BACKEND = "redis://redis:6379/0"
 
+
+# пусть здесь побудет
+# from celery.schedules import crontab
+from datetime import timedelta
+
 CELERY_BEAT_SCHEDULE = {
     "run_script_every_hour": {
         "task": "collector.tasks.collect_weather_periodically",
         # "schedule": 3600.0,  # Каждый час (в секундах)
-        "schedule": 20.0,  # Каждые ... сек (для тестов)
+        "schedule": timedelta(seconds=60),  # со старта и с промежутком
+        # "schedule": crontab(minute=0, hour="*/1"),  # Каждый час
     },
 }
 
 # OpenWeatherMap API key
 OPENWEAWERMAP_API_KEY = os.getenv("OPENWEAWERMAP_API_KEY")
+
+# Geonames API key
+GEONAMES_USERNAME = os.getenv("GEONAMES_USERNAME")
